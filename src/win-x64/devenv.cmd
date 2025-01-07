@@ -14,4 +14,4 @@ IF %ERRORLEVEL% NEQ 0 (
     PAUSE >nul
 )
 
-cmder
+call ./.data/home.cmd

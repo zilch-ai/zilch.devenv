@@ -116,7 +116,7 @@ IF NOT EXIST %SHORTCUT% (
     ECHO Creating DevEnv shortcut...
     SET WORKING_DIR=%~dp0
     SET ICON=%~dp0devenv.ico
-    POWERSHELL -ExecutionPolicy Bypass -file "%~dp0\.system\shortcut.ps1" -shortcut DevEnv -target "%~dp0devenv.bat" -location %~dp0 -icon "%ICON%" -admin
+    POWERSHELL -ExecutionPolicy Bypass -file "%~dp0\.system\shortcut.ps1" -shortcut DevEnv -target "%~dp0devenv.cmd" -location %~dp0 -icon "%ICON%" -admin
     IF ERRORLEVEL 1 (
         ECHO [31mERROR:[0m PowerShell script failed with exit code %ERRORLEVEL%.
         ECHO Stopping execution due to error.
