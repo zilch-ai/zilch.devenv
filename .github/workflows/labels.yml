@@ -1,0 +1,49 @@
+name: Github Labels
+
+on:
+  push:
+    branches:
+      - 'main'
+    paths:
+      - '.github/labels.yml'
+      - '.github/workflows/labels.yml'
+  pull_request:
+    paths:
+      - '.github/labels.yml'
+      - '.github/workflows/labels.yml'
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'Log level'
+        required: true
+        default: 'warning'
+        type: choice
+        options:
+          - info
+          - warning
+          - debug
+      dryrun:
+        description: 'Run in dry-run mode'
+        required: false
+        default: true
+        type: boolean
+
+jobs:
+  labeler:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Run Github Labeler
+        uses: crazy-max/ghaction-github-labeler@v5.1.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          yaml-file: .github/labels.yml
+          dry-run: |
+            ${{
+                github.event_name == 'pull_request' || 
+                (github.event_name == 'workflow_dispatch' && inputs.dryrun == 'true')
+            }}
+          skip-delete: true
