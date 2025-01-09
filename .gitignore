@@ -1,0 +1,23 @@
+# Editor backups and temporary files
+*~
+*.bak
+*.swp
+
+# Auto-created thumbnails
+Thumbs.db
+
+# Build outputs
+artifacts
+publish
+**/bin/
+**/obj/
+
+# Packages installed during the build
+packages
+coverage
+
+# Backup files
+**/.backup
+
+# Logs
+*.log
