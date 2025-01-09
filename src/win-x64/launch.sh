@@ -1,42 +1,48 @@
 #!/bin/bash
 ROOT=$(cd "$(dirname "$0")" && pwd)
 
-# Welcome
+# Try to focus on the current terminal window
+# powershell.exe -File ".system/focus.ps1"
+
+# Greetings
+source "$ROOT/.system/greet.sh"
 echo "Hi, [32m$(whoami)@$(hostname)[0m."
 WELCOME="$ROOT/.data/welcome.txt"
 if [ -f "$WELCOME" ]; then
-    # Welcome ASCII Art
-    echo
     echo -e "[33m$(cat "$WELCOME")[0m"
 fi
 PROMPT="$ROOT/.data/prompt.txt"
 if [ -f "$PROMPT" ]; then
-    # Prompt of the day
-    echo
-    source "$ROOT/.system/prompt.sh" "$PROMPT" 32
+    echo -e "[32m$(prompt "$PROMPT")\n[0m"
 fi
 
-# Countdown with prompt to skip updating dev environment
-SKIPPED=""
-COUNTDOWN=5
-while [ $COUNTDOWN -gt 0 ]; do
-    echo -ne "\rPreparing to update your development environment in $COUNTDOWN seconds... Press any key to skip. "
-    read -t 1 -n 1 key
-    if [ $? -eq 0 ] || [ -n "$key" ]; then
-        SKIPPED="Y"
-        break
-    fi
-    COUNTDOWN=$((COUNTDOWN - 1))
-done
-
-# Update development environment if not skipped
-if [ -z "$SKIPPED" ]; then
-    echo "Proceeding with development environment update..."
-    source "$ROOT/.system/scoop.sh"
-    if [ $? -ne 0 ]; then
-        echo "Error: Failed to update development environment using scoop."
+# Countdown before updating development environment
+powershell.exe -File ".system/focus.ps1"
+countdown "Dev environment updating will start in {{COUNTDOWN}}s. Press ESC to skip or any other key to run immediately..." 5 0
+case $? in
+    2)
+        echo
+        echo "Error: Failed to start the countdown."
         exit 1
-    fi
-else
-    echo "Development environment update skipped by user."
-fi
+        ;;
+    1)
+        echo
+        echo "Development environment update skipped by user."
+        exit 0
+        ;;
+    0)
+        echo
+        echo "Proceeding with development environment update..."
+        ;;
+esac
+
+# Update scoop, buckets and built-in apps
+source "$ROOT/.system/scoop.sh"
+scoop_self \
+&& scoop_buckets "$ROOT/.data/scoop-buckets.csv" \
+&& scoop_apps "$ROOT/.data/scoop-apps.cfg" \
+&& scoop_all \
+|| (echo "Error: Failed to update development environment." && exit 1)
+
+# Pause before continue
+read -p "[DEBUG] Press any key to continue..."

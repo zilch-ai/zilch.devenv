@@ -18,3 +18,6 @@ coverage
 
 # Backup files
 **/.backup
+
+# Logs
+*.log

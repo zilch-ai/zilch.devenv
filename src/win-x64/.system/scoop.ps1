@@ -18,6 +18,7 @@ If ((New-Object Security.Principal.WindowsPrincipal $IsAdmin).IsInRole([Security
     exit 1
 }
 
+Set-ExecutionPolicy RemoteSigned -scope CurrentUser
 Write-Host "Installing scoop to custom directory $scoop..." -ForegroundColor Green
 $env:SCOOP=$scoop
 [environment]::setEnvironmentVariable('SCOOP',$env:SCOOP,'User')
