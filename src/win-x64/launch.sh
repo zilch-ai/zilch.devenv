@@ -1,9 +1,6 @@
 #!/bin/bash
 ROOT=$(cd "$(dirname "$0")" && pwd)
 
-# Try to focus on the current terminal window
-# powershell.exe -File ".system/focus.ps1"
-
 # Greetings
 source "$ROOT/.system/greet.sh"
 echo "Hi, [32m$(whoami)@$(hostname)[0m."

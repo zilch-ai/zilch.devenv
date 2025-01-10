@@ -21,3 +21,6 @@ coverage
 
 # Logs
 *.log
+
+# .LOCALE files
+.locale
