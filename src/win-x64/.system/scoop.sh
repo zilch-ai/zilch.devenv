@@ -93,8 +93,8 @@ function scoop_apps()
     local -a missing_apps
 
     # Load the list of apps
-    output=$(./.system/config.sh "$1" | tr -d '\n') \
-    || { echo "Error: Failed to load the list of scoop apps."; return 1; }
+    source ./.system/config.sh
+    output=$(load_cfg "$1" | tr -d '\n') || { echo "Error: Failed to load the list of scoop apps."; return 1; }
     IFS=$' ' read -r -a apps <<< "$output"
     if [ ${#apps[@]} -eq 0 ]; then
         echo "Warn: No apps found in the config file."
