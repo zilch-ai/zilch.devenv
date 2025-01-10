@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Check if the script is being sourced
-source .system/reentry.sh
-reentry "$0" || return 0
+source "$LAUNCH_ROOT/.system/reentry.sh"
+reentry "${BASH_SOURCE[0]}" || return 0
 
 # Find the proper locale file if available
 function find_locale_file()
