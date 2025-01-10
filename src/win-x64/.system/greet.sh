@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Check if the script is being sourced
+source .system/reentry.sh
+reentry "$0" || return 0
+
 # Find the proper locale file if available
 function find_locale_file()
 {
@@ -77,7 +81,7 @@ function prompt()
                 record=""
             fi
         else
-            record+="$line"
+            record+="$line\n"
         fi
     done < "$PROMPT"
     if [[ -n "$record" ]]; then

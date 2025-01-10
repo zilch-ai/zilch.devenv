@@ -3,6 +3,8 @@ ROOT=$(cd "$(dirname "$0")" && pwd)
 
 # Greetings
 source "$ROOT/.system/greet.sh"
+source "$ROOT/.system/greet.sh"
+source "$ROOT/.system/greet.sh"
 echo "Hi, [32m$(whoami)@$(hostname)[0m."
 WELCOME="$ROOT/.data/welcome.txt"
 if [ -f "$WELCOME" ]; then

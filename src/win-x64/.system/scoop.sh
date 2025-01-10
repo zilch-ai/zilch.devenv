@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Check if the script is being sourced
+source .system/reentry.sh
+reentry "$0" || return 0
+
+# Check if scoop is installed
 function scoop_exists()
 {
     if ! powershell.exe -Command "Get-Command scoop" &>/dev/null; then
