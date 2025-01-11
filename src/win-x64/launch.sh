@@ -3,8 +3,7 @@ LAUNCH_ROOT=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
 
 # Load .conf file
 source "$LAUNCH_ROOT/.system/config.sh"
-load_conf "$LAUNCH_ROOT/launch.conf" || { echo "Error: Failed to load the 'launch.conf' file."; exit 1; }
-read -p "[DEBUG] Press any key to continue..."
+conf=$(load_conf "$LAUNCH_ROOT/launch.conf") || { echo "Error: Failed to load the 'launch.conf' file."; exit 1; }
 
 # Greetings
 source "$LAUNCH_ROOT/.system/greet.sh"
@@ -15,6 +14,8 @@ if [ -f "$WELCOME" ]; then
 fi
 PROMPT="$LAUNCH_ROOT/.data/prompt.txt"
 if [ -f "$PROMPT" ]; then
+    LOCALE=$(extract_conf "$conf" "locale")
+    PROMPT=$(with_locale "$PROMPT" "$LOCALE")
     echo -e "[32m$(prompt "$PROMPT")\n[0m"
 fi
 

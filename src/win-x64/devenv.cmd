@@ -12,7 +12,7 @@ REM Set the code page to UTF-8
 CHCP 65001 >nul
 
 REM Launch the development environment for updating
-bash -l ./launch.sh ^| tee -a launch.log
+bash -l ./launch.sh 2^>^&1 ^| tee -a launch.log
 IF %ERRORLEVEL% NEQ 0 (
     ECHO Error: Failed to execute launch script.
     ECHO.
