@@ -1,15 +1,21 @@
 #!/bin/bash
-ROOT=$(cd "$(dirname "$0")" && pwd)
+LAUNCH_ROOT=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
+
+# Load .conf file
+source "$LAUNCH_ROOT/.system/config.sh"
+conf=$(load_conf "$LAUNCH_ROOT/launch.conf") || { echo "Error: Failed to load the 'launch.conf' file."; exit 1; }
 
 # Greetings
-source "$ROOT/.system/greet.sh"
+source "$LAUNCH_ROOT/.system/greet.sh"
 echo "Hi, [32m$(whoami)@$(hostname)[0m."
-WELCOME="$ROOT/.data/welcome.txt"
+WELCOME="$LAUNCH_ROOT/.data/welcome.txt"
 if [ -f "$WELCOME" ]; then
     echo -e "[33m$(cat "$WELCOME")[0m"
 fi
-PROMPT="$ROOT/.data/prompt.txt"
+PROMPT="$LAUNCH_ROOT/.data/prompt.txt"
 if [ -f "$PROMPT" ]; then
+    LOCALE=$(extract_conf "$conf" "locale")
+    PROMPT=$(with_locale "$PROMPT" "$LOCALE")
     echo -e "[32m$(prompt "$PROMPT")\n[0m"
 fi
 
@@ -34,12 +40,11 @@ case $? in
 esac
 
 # Update scoop, buckets and built-in apps
-source "$ROOT/.system/scoop.sh"
-scoop_self \
-&& scoop_buckets "$ROOT/.data/scoop-buckets.csv" \
-&& scoop_apps "$ROOT/.data/scoop-apps.cfg" \
-&& scoop_all \
-|| (echo "Error: Failed to update development environment." && exit 1)
+source "$LAUNCH_ROOT/.system/scoop.sh"
+scoop_self || (echo "Error: Failed to update development environment." && exit 1)
+scoop_buckets "$LAUNCH_ROOT/.data/scoop-buckets.csv" || (echo "Error: Failed to update development environment." && exit 1)
+scoop_apps "$LAUNCH_ROOT/.data/scoop-apps.cfg" || (echo "Error: Failed to update development environment." && exit 1)
+scoop_all || (echo "Error: Failed to update development environment." && exit 1)
 
 # Pause before continue
 read -p "[DEBUG] Press any key to continue..."
