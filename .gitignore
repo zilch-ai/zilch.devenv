@@ -24,3 +24,7 @@ coverage
 
 # .LOCALE files
 .locale
+
+# itest files
+**/itest.*
+

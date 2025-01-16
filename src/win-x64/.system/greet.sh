@@ -9,7 +9,7 @@ function prompt()
 {
     # Check usage with correct arguments as inputs
     if [ -z "$1" ]; then
-        usage "Usage: $0 <filename>"
+        usage "Usage: ${FUNCNAME[0]} <filename>"
         usage "- <filename>: The file containing the list of prompts separated by '---'."
         return 1
     fi
@@ -17,7 +17,7 @@ function prompt()
     # Check if the file exists and is readable
     local PROMPT="$1"
     if [ ! -r "$PROMPT" ]; then
-        error "Error: File '$PROMPT' not found or is not readable."
+        error "File '$PROMPT' not found or is not readable."
         return 1
     fi
 
@@ -57,7 +57,7 @@ function countdown()
 {
     # Check usage with correct arguments as inputs
     if [ -z "$1" ]; then
-        usage "Usage: $0 <template> [<duration>] [<timeout>]"
+        usage "Usage: ${FUNCNAME[0]} <template> [<duration>] [<timeout>]"
         usage "- <template>: A message template containing {{COUNTDOWN}} as the countdown placeholder."
         usage "- <duration>: The optional countdown duration in seconds (positive integer, default:5)."
         usage "- <timeout>: The optional exit code for timeout (0/1, default:1)."
