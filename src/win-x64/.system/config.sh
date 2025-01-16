@@ -9,7 +9,7 @@ function with_locale()
 {
     # Check usage with correct arguments as inputs
     if [ -z "$1" ]; then
-        usage "Usage: $0 <filename> [<locale>]"
+        usage "Usage: ${FUNCNAME[0]} <filename> [<locale>]"
         usage "- <filename>: The original file name."
         usage "- <locale>: The optional locale in RFC 5646 format (language-REGION)."
         return 1
@@ -64,7 +64,7 @@ function with_locale()
     fi
 
     # Return the locale file if found
-    trace "Fallback to '$LOCALE_FILE'."
+    trace "Fallback to '$LOCALE_FILE' in locale."
     echo "$LOCALE_FILE"
 }
 
@@ -73,7 +73,7 @@ function load_cfg()
 {
     # Check usage with correct arguments as inputs
     if [ -z "$1" ]; then
-        usage "Usage: $0 <filename>"
+        usage "Usage: ${FUNCNAME[0]} <filename>"
         usage "- <filename>: The .cfg configuration file contains the list of items."
         return 1
     fi
@@ -81,7 +81,7 @@ function load_cfg()
     # Check if the file exists and is readable
     CONFIG=$(readlink -f "$1")
     if [ ! -r "$CONFIG" ]; then
-        error "Error: File '$CONFIG' not found or is not readable."
+        error "File '$CONFIG' not found or is not readable."
         return 1
     fi
 
@@ -113,7 +113,7 @@ function load_conf()
 {
     # Check usage with correct arguments as inputs
     if [ -z "$1" ]; then
-        usage "Usage: $0 <filename>"
+        usage "Usage: ${FUNCNAME[0]} <filename>"
         usage "- <filename>: The .conf configuration file contains the list of key-value pairs."
         return 1
     fi
@@ -121,7 +121,7 @@ function load_conf()
     # Check if the file exists and is readable
     local CONF="$1"
     if [ ! -r "$CONF" ]; then
-        error "Error: File '$CONF' not found or is not readable."
+        error "File '$CONF' not found or is not readable."
         return 1
     fi
 
@@ -191,7 +191,7 @@ function extract_conf()
 {
     # Check usage with correct arguments as inputs
     if [ -z "$1" ] || [ -z "$2" ]; then
-        usage "Usage: $0 <content> <key>"
+        usage "Usage: ${FUNCNAME[0]} <content> <key>"
         usage "- <content>: The .conf configuration file."
         usage "- <key>: The key whose value needs to be extracted."
         return 1
@@ -239,7 +239,7 @@ function extract_conf()
             print value
             exit
         }
-    }') || { echo "Error: Key '$KEY' not found in the configuration file."; return 1; }
+    }') || { error "Key '$KEY' not found in the configuration file."; return 1; }
 
     # Return the extracted value
     echo "$value"
