@@ -15,10 +15,9 @@ It contains the following features for win-x64 dev enlistment:
     - [x] Support ANSI color and utf-8 encoding by default
     - [x] Allow `launch.conf` for customizing the launch behavior.
   - Welcome Screen
-    - [x] Say hi with machine name, user name and bash version
-    - [x] ASCII art
+    - [x] Template message with ASCII art
     - [x] Prompt of the day (with locale support)
-    - [x] Countdown
+    - [x] Countdown to start checking and updating dev environment
   - Scoop Apps
     - [x] Add customized buckets if need
     - [x] List required scoop apps and install
