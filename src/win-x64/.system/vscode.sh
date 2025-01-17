@@ -11,6 +11,7 @@ source "$LAUNCH_ROOT/.system/scoop.sh"
 # Set the default vscode editor
 VSCODE_APP=""
 VSCODE_CMD=""
+VSCODE_MARKET=""
 VSCODE_BINPATH=""
 VSCODE_READY=""
 
@@ -46,34 +47,59 @@ function vscode_ready()
 function vscode_default()
 {
     # Usage with correct arguments as inputs
-    if [ -z "$1" ]; then
-        usage "Usage: ${FUNCNAME[0]} <app> <cmd>"
+    if [ -z "$1" ] || [ $# -gt 1 ]; then
+        usage "Usage: ${FUNCNAME[0]} <app>"
         usage "- <app>: The app name of the vscode editor."
-        usage "- <cmd>: The command to launch the vscode editor."
         return 1
     fi
 
     # Check if the editor is already set
-    if [ "$VSCODE_EDITOR" == "$1" ]; then
+    if [ "$VSCODE_APP" == "$1" ]; then
         echo "Skip to set the default vscode editor '$1': Already set."
         return 0
     fi
 
+    # Set vscode settings based on the app name
+    local app cmd market
+    case $1 in
+        "vscode" | "VSCode")
+            app="vscode"
+            cmd="code"
+            market="vs-marketplace"
+            ;;
+        "vscodium" | "VSCodium")
+            app="vscodium"
+            cmd="codium"
+            market="open-vsx"
+            ;;
+        "cursor" | "Cursor")
+            app="cursor"
+            cmd="code"
+            market=""
+            ;;
+        *)
+            error "Unrecognized vscode editor '$1'."
+            return 1
+            ;;
+    esac
+
     # Check if scoop app is installed and get the scoop location
-    local binpath=$(scoop_binpath "$1" "${2:-code}") || return 1
+    local binpath=$(scoop_binpath "$app" "$cmd") || return 1
     if [ -z "$binpath" ]; then
-        error "The vscode editor '$1' is not installed."
+        error "The vscode editor '$app' is not installed."
         return 1
     fi
-    trace "BINPATH of vscode editor '$1'" "$binpath"
+    trace "BINPATH of vscode" "$binpath"
 
     # Set the vscode editor as the default editor
-    VSCODE_APP="$1"
-    VSCODE_CMD="${2:-code}"
-    VSCODE_BINPATH="$binpath"
+    export VSCODE_APP="$app"
+    export VSCODE_CMD="$cmd"
+    export VSCODE_MARKET="$market"
+    export VSCODE_BINPATH="$binpath"
     trace "VSCODE_APP" "$VSCODE_APP"
     trace "VSCODE_CMD" "$VSCODE_CMD"
     trace "VSCODE_BINPATH" "$VSCODE_BINPATH"
+    trace "VSCODE_MARKET" "$VSCODE_MARKET"
     
     # Check if the vscode editor is installed and functional
     vscode_ready || return 1
@@ -85,10 +111,9 @@ function vscode_latest()
 {
     # Usage with correct arguments as inputs
     if [ -z "$1" ]; then
-        usage "Usage: ${FUNCNAME[0]} <publisher>.<extension> [<marketplace>]"
+        usage "Usage: ${FUNCNAME[0]} <publisher>.<extension>"
         usage "- <publisher>: The name of the publisher of vscode extension."
         usage "- <extension>: The name of the vscode extension."
-        usage "- <marketplace>: 'vs-marketplace'(default) or 'open-vsx'."
         return 1
     fi
     local PUBLISHER=$(echo "$1" | awk -F'.' '{print $1}')
@@ -97,14 +122,6 @@ function vscode_latest()
         error "Unrecognized format of vscode extension '$1'."
         usage "Format: <publisher>.<extension>"
         usage "Example: ms-python.python"
-        return 1
-    fi
-    local MARKETPLACE="${2:-vs-marketplace}"
-    if [ "$MARKETPLACE" != "vs-marketplace" ] && [ "$MARKETPLACE" != "open-vsx" ]; then
-        error "Unrecognized format of vscode extension marketplace '$2'."
-        usage "Format: vs-marketplace | open-vsx"
-        usage "Example: vs-marketplace"
-        usage "Example: open-vsx"
         return 1
     fi
 
@@ -116,7 +133,7 @@ function vscode_latest()
     fi
 
     # Fetch the latest version from open-vsx.org
-    if [ "$MARKETPLACE" == "open-vsx" ]; then
+    if [ "$VSCODE_MARKET" == "open-vsx" ]; then
         local JSON=$(curl -s "https://open-vsx.org/api/$PUBLISHER/$EXTENSION/latest")
         local VERSION=$(echo "$JSON" | awk -F'"version":"' '{print $2}' | awk -F'"' '{print $1}')
         if [[ -z "$VERSION" || "$VERSION" == "null" ]]; then
@@ -130,7 +147,7 @@ function vscode_latest()
     fi
 
     # Fetch the latest version from marketplace.visualstudio.com
-    if [ "$MARKETPLACE" == "vs-marketplace" ]; then
+    if [ "$VSCODE_MARKET" == "vs-marketplace" ]; then
         # References of Visual Studio Marketplace API:
         # - https://github.com/microsoft/navcontainerhelper/blob/main/HelperFunctions.ps1
         # - https://github.com/microsoft/azure-devops-node-api/blob/master/api/interfaces/GalleryInterfaces.ts
@@ -161,7 +178,6 @@ function vscode_latest()
         if [[ -z $response ]]; then
             error "Failed to connect to Visual Studio Marketplace API."
             trace "VSCode Extension" "$EXTENSION"
-            trace "VSCode Marketplace" "$MARKETPLACE"
             trace "Pre-Release" "$PRE_RELEASE"
             return 1
         fi
@@ -204,7 +220,7 @@ function vscode_latest()
         return 0
     fi
 
-    error "Unsupported marketplace '$MARKETPLACE'."
+    error "Unsupported vscode marketplace '$VSCODE_MARKET'."
     return 1
 }
 
@@ -212,11 +228,12 @@ function vscode_latest()
 function vscode_list()
 {
     # Usage with correct arguments as inputs
-    if [ $# -gt 1 ]; then
-        usage "Usage: ${FUNCNAME[0]} [<marketplace>]"
-        usage "- <marketplace>: 'vs-marketplace'(default) or 'open-vsx'."
+    if [ $# -gt 1 ] || ! check_flag "--available" "$1"; then
+        usage "Usage: ${FUNCNAME[0]} [--available]"
+        usage "- available: optional flag to filter available updates of installed extensions."
         return 1
     fi
+    AVAILABLE=$1
 
     # Check if vscode is ready
     vscode_ready || return 1
@@ -235,18 +252,17 @@ function vscode_list()
     trace "VSCode Extension (Installed)" installed_extensions  
 
     # Output all installed vscode extensions if no marketplace is provided
-    if [ -z "$1" ]; then
+    if [ -z "$AVAILABLE" ]; then
         echo "${!installed_extensions[@]}"
         return 0
     fi
 
     # Check for update of installed extensions from the marketplace
-    local MARKETPLACE="$1"
     local latest_version
     local -a available_extensions
     for extension_id in "${!installed_extensions[@]}"; do
         trace "Detecting latest verion of VSCode Extension '$extension_id'..."
-        latest_version=$(vscode_latest "$extension_id" "$MARKETPLACE")
+        latest_version=$(vscode_latest "$extension_id")
         if [ $? -ne 0 ]; then
             warn "Failed to get the latest version of vscode extension '$extension_id'."
             continue
@@ -367,7 +383,7 @@ function vscode_extensions()
 
     # Fetch the available updates for installed extensions
     local -a available_extensions
-    output=$(vscode_list "vs-marketplace") || return 1
+    output=$(vscode_list --available) || return 1
     IFS=$' ' read -r -a available_extensions <<< "$output"
     if [ ${#available_extensions[@]} -eq 0 ]; then
         echo "All installed vscode extensions are up-to-date."
