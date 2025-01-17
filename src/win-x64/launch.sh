@@ -3,7 +3,6 @@ LAUNCH_ROOT=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
 
 # Trace the bash version and shell path
 source "$LAUNCH_ROOT/.system/reentry.sh"
-#trace "Bash '$BASH_VERSION' is running from '$SHELL'."
 
 # Load .conf file and extract debug flage and locale settings
 source "$LAUNCH_ROOT/.system/config.sh"
@@ -13,11 +12,7 @@ LOCALE=$(extract_conf "$SETTINGS" "locale")
 
 # Greetings
 source "$LAUNCH_ROOT/.system/greet.sh"
-echo "Hi, [32m$(whoami)@$(hostname)[0m."
-WELCOME="$LAUNCH_ROOT/.data/welcome.txt"
-if [ -f "$WELCOME" ]; then
-    echo -e "[33m$(cat "$WELCOME")[0m"
-fi
+sayhi "$LAUNCH_ROOT/.data/welcome.txt"
 PROMPT="$LAUNCH_ROOT/.data/prompt.txt"
 if [ -f "$PROMPT" ]; then
     PROMPT=$(with_locale "$PROMPT" "$LOCALE")

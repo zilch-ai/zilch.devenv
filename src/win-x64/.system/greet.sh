@@ -4,6 +4,36 @@
 source "$LAUNCH_ROOT/.system/reentry.sh"
 reentry "${BASH_SOURCE[0]}" || return 0
 
+# Say hi to the user with a custom message
+function sayhi()
+{
+    # Check usage with correct arguments as inputs
+    if [ $# -gt 1 ]; then
+        echo "Usage: sayhi [template]"
+        return 0
+    fi
+
+    # If no arguments are provided, say hi to the user
+    if [ -z "$1" ]; then
+        echo "Hi, $(whoami)@$(hostname)."
+        return 0
+    fi
+
+    # Check if the file exists and is readable
+    if [ ! -r "$1" ]; then
+        echo "Welcome template file '$1' not found or is not readable."
+        return 1
+    fi
+
+    # Evaluate the template and display the message
+    local template=$(<$1)
+    local command='
+        echo "'"$template"'"
+    '
+    local content=$(bash -c "$command")
+    echo "$content"
+}
+
 # Prompt for start of the day
 function prompt()
 {
