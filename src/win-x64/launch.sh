@@ -55,7 +55,8 @@ scoop_update "--all" || exit 1 # Update all installed scoop apps
 
 # Update vscode and its extensions
 source "$LAUNCH_ROOT/.system/vscode.sh"
-vscode_default "vscode" "code" || exit 1
+VSCODE_EDITOR=$(extract_conf "$SETTINGS" "vscode_editor")
+vscode_default "${VSCODE_EDITOR:-vscode}" || exit 1
 vscode_extensions "$LAUNCH_ROOT/.data/vscode-exts.cfg" || exit 1
 
 # Pause before continue
