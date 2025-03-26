@@ -1,0 +1,7 @@
+rust-lang.rust-analyzer                     # rust编程语言
+vadimcn.vscode-lldb                         # LLDB调试工具
+ms-vscode.cmake-tools                       # CMake工具
+tamasfe.even-better-toml                    # toml配置文件
+ryanluker.vscode-coverage-gutters           # 测试代码覆盖率可视化
+tauri-apps.tauri-vscode                     # Tauri官方插件
+Vue.volar                                   # Volar（Vue官方插件）
