@@ -1,0 +1,3 @@
+dotnettools.vscode-dotnet-runtime       # .NET runtime
+dotnettools.csdevkit                    # C# development kit
+dotnettools.csharp                      # C# language support
