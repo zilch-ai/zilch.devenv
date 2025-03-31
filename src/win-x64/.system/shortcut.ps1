@@ -3,8 +3,8 @@ param
     [string]$shortcut,
     [string]$target,
     [string]$arguments = $null,
-    [string]$location = $null,
     [string]$icon = $null,
+    [string]$location = $null,
     [string]$desktop = $null,
     [switch]$admin = $false
 )

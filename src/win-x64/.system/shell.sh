@@ -6,54 +6,52 @@ reentry "${BASH_SOURCE[0]}" || return 0
 
 ALLOWED_SHELLS="cmd|ps"
 
-# Run command in the shell
-function shell_exec()
+# Run command in CMD shell
+function cmd_exec()
 {
     # Check usage with correct arguments as inputs
-    if [[ $# -lt 2 ]] || [[ $# -gt 3 ]] || ! check_enum "$ALLOWED_SHELLS" "$1" || ! check_flag "--silent" "$3"; then
-        usage "Usage: ${FUNCNAME[0]} <shell> <command> [--silent]"
-        usage "- <shell>: The shell to execute the command (allowed:$ALLOWED_SHELLS)."
-        usage "- <command>: The command to execute in the shell."
+    if [[ $# -lt 1 || $# -gt 2 ]] || { [[ $# -eq 2 ]] && ! check_flag "--silent" "$2"; }; then
+        usage "Usage: ${FUNCNAME[0]} <command> [--silent]"
+        usage "- <command>: The command to execute in the `cmd` shell."
         usage "- [--silent]: Optional flag to suppress output."
         return 1
     fi
-    local shell="$1"
-    local command="$2"
-    local silent="$3"
-
-    # Execute the command with output
-    if [ -z "$silent" ]; then
-        case "$shell" in
-            cmd)
-                cmd.exe /c "$command"
-                return $?
-                ;;
-            ps)
-                powershell.exe -Command "$command"
-                return $?
-                ;;
-            *)
-                error "Invalid shell '$shell'."
-                return 1
-                ;;
-        esac
-    fi
+    local command="$1"
+    local silent="$2"
 
     # Execute the shell command silently
-    case "$shell" in
-        cmd)
-            cmd.exe /c "$command >nul 2>&1"
-            return $?
-            ;;
-        ps)
-            powershell.exe -Command "$command | Out-Null"
-            return $?
-            ;;
-        *)
-            error "Invalid shell '$shell'."
-            return 1
-            ;;
-    esac
+    if [ -z "$silent" ]; then
+        trace "EXEC" "timeout 5s cmd /c \"$command\""
+        timeout 5s cmd /c "$command"
+    else
+        trace "EXEC" "timeout 5s cmd /c \"$command >nul 2>&1\""
+        timeout 5s cmd /c "$command >nul 2>&1"
+    fi
+    return $?
+}
+
+# Run command in PS shell
+function pwsh_exec()
+{
+    # Check usage with correct arguments as inputs
+    if [[ $# -lt 1 || $# -gt 2 ]] || { [[ $# -eq 2 ]] && ! check_flag "--silent" "$2"; }; then
+        usage "Usage: ${FUNCNAME[0]} <command> [--silent]"
+        usage "- <command>: The command to execute in the `cmd` shell."
+        usage "- [--silent]: Optional flag to suppress output."
+        return 1
+    fi
+    local command="$1"
+    local silent="$2"
+
+    # Execute the shell command silently
+    if [ -z "$silent" ]; then
+        trace "EXEC: pwsh -Command \"$command\""
+        pwsh -Command "$command"
+    else
+        trace "EXEC: pwsh -Command \"$command | Out-Null\""
+        pwsh -Command "$command | Out-Null"
+    fi
+    return $?
 }
 
 # Get the binary path of the command in the shell
@@ -72,10 +70,10 @@ function shell_binpath()
     # Execute the command in specific console
     case "$shell" in
         cmd)
-            shell_exec "$shell" "where $command"
+            cmd_exec "where $command"
             ;;
         ps)
-            shell_exec "$shell" "Get-Command $command | Select-Object -ExpandProperty Source"
+            pwsh_exec "Get-Command '$command' | Select-Object -ExpandProperty Source"
             ;;
         *)
             error "Invalid shell '$shell'."
@@ -83,4 +81,3 @@ function shell_binpath()
             ;;
     esac
 }
-

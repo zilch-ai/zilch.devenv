@@ -160,17 +160,17 @@ function scoop_list()
 
     # Parse the output and store the list of installed apps
     local installed_apps
-    output=$(echo "$output" | awk 'NR>4 {print $1}' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
-    IFS=$'\n' read -r -d '' -a installed_apps <<< "$output"
+    output=$(echo "$output" | awk 'NR>4 {print $1}' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//;s/\r//g' | sed '/^$/d')
+    IFS=$'\n' mapfile -t installed_apps <<< "$output"
     if [ ${#installed_apps[@]} -eq 0 ]; then
         trace "No scoop apps found."
         return 0
     fi
-    trace "Scoop Apps (Installed)" installed_apps
+    trace "Scoop Apps (Installed, scoop_list)" installed_apps
 
     # Output the list of installed apps if exact match is not required
     if [ $exact -eq 0 ]; then
-        echo "${installed_apps[@]}"
+        IFS=$'\n'; echo "${installed_apps[*]}"
         return 0
     fi
 
@@ -206,7 +206,9 @@ function scoop_binpath()
     fi
 
     local command="${2:-$app}"
-    local output=$(shell_binpath "cmd" "$command")
+    trace "Scoop App" "$app"
+    trace "Scoop Command" "$command"
+    local output=$(shell_binpath "ps" "$command")
     local binpath
     if [ -z "$output" ]; then
         error "Command '$command' for '$app' is not found."
@@ -221,7 +223,7 @@ function scoop_binpath()
             echo "$binpath"
             return 0
         fi
-    done <<< "$output"    
+    done <<< "$output"
 
     # Return the bin path
     error "All binpath candidates for '$app' are not under scoop apps."
@@ -258,8 +260,8 @@ function scoop_apps()
 
     # Get the list of installed apps
     output=$(scoop_list) || return 1;
-    IFS=$' ' read -r -d '' -a installed_apps <<< "$output"
-    trace "Scoop Apps (Installed)" installed_apps
+    IFS=$'\n' mapfile -t installed_apps <<< "$output"
+    trace "Scoop Apps (Installed, scoop_apps)" installed_apps
 
     # Check for missing apps
     missing_apps=()

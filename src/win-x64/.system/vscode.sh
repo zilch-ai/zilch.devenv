@@ -32,7 +32,7 @@ function vscode_ready()
     fi
 
     # Check if the vscode editor is installed and functional
-    if ! shell_exec "cmd" "$VSCODE_BINPATH --version" --silent; then
+    if ! cmd_exec "$VSCODE_BINPATH --version" --silent; then
         error "'$VSCODE_BINPATH' for vscode exists but is not functional."
         VSCODE_READY=0
         return 1

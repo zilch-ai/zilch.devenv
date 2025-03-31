@@ -110,18 +110,23 @@ IF ERRORLEVEL 1 (
 )
 
 REM Create DevEnv shortcut if need
-SET SHORTCUT="%USERPROFILE%\Desktop\DevEnv.lnk"
-IF NOT EXIST %SHORTCUT% (
+SET SHORTCUT_NAME=DevEnv.lnk
+SET SHORTCUT_PATH="%USERPROFILE%\Desktop\%SHORTCUT_NAME%"
+IF NOT EXIST %SHORTCUT_PATH% (
     ECHO DevEnv shortcut not found on the desktop.
     ECHO Creating DevEnv shortcut...
-    SET WORKING_DIR=%~dp0
-    SET ICON=%~dp0devenv.ico
-    POWERSHELL -ExecutionPolicy Bypass -file "%~dp0\.system\shortcut.ps1" -shortcut DevEnv -target "%~dp0devenv.cmd" -location %~dp0 -icon "%ICON%" -admin
+    SETLOCAL ENABLEDELAYEDEXPANSION
+    SET SHORTCUT_SCRIPT="%~dp0.system\shortcut.ps1"
+    SET SHORTCUT_TARGET="%~dp0devenv.cmd"
+    SET SHORTCUT_ICON="%~dp0devenv.ico"
+    ECHO SHORTCUT_SCRIPT: !SHORTCUT_SCRIPT!
+    POWERSHELL -ExecutionPolicy Bypass -file "!SHORTCUT_SCRIPT!" -shortcut "DevEnv" -target "!SHORTCUT_TARGET!" -icon "!SHORTCUT_ICON!" -admin -location %~dp0
     IF ERRORLEVEL 1 (
         ECHO [31mERROR:[0m PowerShell script failed with exit code %ERRORLEVEL%.
         ECHO Stopping execution due to error.
         EXIT /b %ERRORLEVEL%
     )
+    ENDLOCAL
     ECHO Shortcut created.
     ECHO.
 )

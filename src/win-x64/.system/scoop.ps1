@@ -7,7 +7,7 @@ param
 if ([string]::IsNullOrEmpty($scoop))
 {
     $drive = [System.IO.Path]::GetPathRoot($MyInvocation.MyCommand.Path)    
-    $scoop = $drive\scoop
+    $scoop = Join-Path -Path $drive -ChildPath "scoop"
 }
 
 # Verify that user running script is an administrator
